@@ -2,7 +2,7 @@ import logo from './logo.svg';
 // import './App.css';
 import {useState, useEffect} from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css';
-import {Container, Row, Col, Navbar, Form, Button, Dropdown, DropdownButton, InputGroup, FormControl, FormLabel} from 'react-bootstrap';
+import {Button, Dropdown, InputGroup, FormControl, FormLabel, ButtonGroup, Form} from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faMagnifyingGlass } from '@fortawesome/free-solid-svg-icons';
 
@@ -10,11 +10,13 @@ import { faMagnifyingGlass } from '@fortawesome/free-solid-svg-icons';
 function App() {
 
   const [beers, updateBeers] = useState([])
-  const[searchInput, setSearchInput] = useState('');
+  const [searchInput, setSearchInput] = useState('');
   const [filteredResults, setFilteredResults] = useState([])
+  const [isLoading, Loading] = useState(false)
+  const [option, setOption] = useState()
 
   const fetchData = () => {
-    fetch('https://api.punkapi.com/v2/beers')
+    fetch('https://api.punkapi.com/v2/beers?per_page=80')
     //https://zoo-animal-api.herokuapp.com/animals/rand/3 this works!
       .then(response => {
         return response.json()
@@ -42,6 +44,25 @@ function App() {
     }
   }
 
+  const filterResultsFromDropdown = (searchP) => {
+    if (searchInput !== '' && searchP === 'first_brewed') {
+      const filteredData = [...filteredResults].sort((a,b) => {
+        return a.first_brewed.localeCompare(b.first_brewed)
+      })
+      console.log(filteredData)
+      setFilteredResults(filteredData)
+    }
+    else {
+      if (searchInput !== '' && searchP === 'ph') {
+        const filteredData = [...filteredResults].sort((a,b) => {
+          return a.ph < b.ph
+        })
+        console.log(filteredData)
+        setFilteredResults(filteredData)
+      }
+    }
+}
+
   return (
     <div className="App">
 
@@ -55,11 +76,21 @@ function App() {
           onChange={event => searchItems(event.target.value)}
         />
         <Button id="buttonSubmit"><FontAwesomeIcon icon={faMagnifyingGlass}></FontAwesomeIcon></Button>
+         {/* <Button id="buttonSubmit"><FontAwesomeIcon icon={faMagnifyingGlass}></FontAwesomeIcon></Button> */}
       </InputGroup>
+
+      <Form.Label>Filter By</Form.Label>
+      <Form.Select onChange={(e) => filterResultsFromDropdown(e.target.value)}>
+          <option value=""></option>
+          <option value="first_brewed">First brewed</option>
+          <option value="ph">ph level</option>
+        </Form.Select>
+
+        <hr />
 
       <header className="App-header">
           {searchInput.length > 1 ? (
-            <p>Number of results: {filteredResults.length}</p>
+            <p>Number of results from search: {filteredResults.length}</p>
           ) : (
             <p>Number of results: {beers.length}</p>
           )}
@@ -69,14 +100,20 @@ function App() {
               return (
               <li key={item.id}> 
               <h5>Beer: {item.name}</h5>
-              Description: {item.description}</li>
+              Description: {item.description} <br />
+              Tagline: {item.tagline} <br />
+              First brewed: {item.first_brewed} <br />
+              ph level: {item.ph}</li>
             )})
           ) : (
             beers.map((item) => {
               return (
-              <li key={item.id}> 
+              <li key={item.id}>
               <h5>Beer: {item.name}</h5>
-              Description: {item.description}</li>
+              Description: {item.description} <br />
+              Tagline: {item.tagline} <br />
+              First brewed: {item.first_brewed} <br />
+              ph level: {item.ph}</li>
             )})
           )}
         </ul>
