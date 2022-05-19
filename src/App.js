@@ -1,15 +1,17 @@
 import logo from './logo.svg';
-//import './App.css';
+// import './App.css';
 import {useState, useEffect} from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css';
-import {Container, Row, Col, Navbar} from 'react-bootstrap';
+import {Container, Row, Col, Navbar, Form, Button, Dropdown, DropdownButton, InputGroup, FormControl, FormLabel} from 'react-bootstrap';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faMagnifyingGlass } from '@fortawesome/free-solid-svg-icons';
 
 
 function App() {
 
-  const [animals, updateAnimals] = useState([])
+  const [beers, updateBeers] = useState([])
   const[searchInput, setSearchInput] = useState('');
-  const [filteredRersults, setFilteredResults] = useState([])
+  const [filteredResults, setFilteredResults] = useState([])
 
   const fetchData = () => {
     fetch('https://api.punkapi.com/v2/beers')
@@ -19,7 +21,7 @@ function App() {
       })
       .then(data => {
         console.log(data)
-        updateAnimals(data)
+        updateBeers(data)
       })
   }
 
@@ -30,37 +32,54 @@ function App() {
   const searchItems = (searchValue) => {
     setSearchInput(searchValue)
     if (searchInput !== '') {
-      const filteredData = animals.filter((item) => {
-        return Object.values(item).join('').includes(searchInput)
+      const filteredData = beers.filter((item) => {
+        return Object.values(item.name).join('').toLowerCase().includes(searchInput.toLowerCase())
       })
       setFilteredResults(filteredData)
     }
     else {
-      setFilteredResults(animals)
+      setFilteredResults(beers)
     }
   }
 
   return (
     <div className="App">
+
+      <FormLabel htmlFor="beerSearch">Search API for Beers</FormLabel>
+      <InputGroup className="mb-3">
+
+        <FormControl
+          id="beerSearch"
+          type="text"
+          placeholder="Enter a beer..."
+          onChange={event => searchItems(event.target.value)}
+        />
+        <Button id="buttonSubmit"><FontAwesomeIcon icon={faMagnifyingGlass}></FontAwesomeIcon></Button>
+      </InputGroup>
+
       <header className="App-header">
-        <input type="text" placeholder='Enter a beer...' onChange={event => searchItems(event.target.value)}></input>
-      <ul>
-        {searchInput.length > 1 ? (
-          filteredRersults.map((item) => {
-            return (
-            <li key={item.id}> 
-            <h5>Beer: {item.name}</h5>
-            Description: {item.description}</li>
-          )})
-        ) : (
-          animals.map((item) => {
-            return (
-            <li key={item.id}> 
-            <h5>Beer: {item.name}</h5>
-            Description: {item.description}</li>
-          )})
-        )}
-      </ul>
+          {searchInput.length > 1 ? (
+            <p>Number of results: {filteredResults.length}</p>
+          ) : (
+            <p>Number of results: {beers.length}</p>
+          )}
+        <ul>
+          {searchInput.length > 1 ? (
+            filteredResults.map((item) => {
+              return (
+              <li key={item.id}> 
+              <h5>Beer: {item.name}</h5>
+              Description: {item.description}</li>
+            )})
+          ) : (
+            beers.map((item) => {
+              return (
+              <li key={item.id}> 
+              <h5>Beer: {item.name}</h5>
+              Description: {item.description}</li>
+            )})
+          )}
+        </ul>
       </header>
     </div>
   );
