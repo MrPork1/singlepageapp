@@ -9,17 +9,15 @@ import { faMagnifyingGlass } from '@fortawesome/free-solid-svg-icons';
 
 function App() {
 
-  const textInput = React.createRef()
-
   const [beers, updateBeers] = useState([])
   const [searchInput, setSearchInput] = useState('')
   const [filteredResults, setFilteredResults] = useState([])
+  const [isDoneFiltering, setIsDoneFiltering] = useState(false)
   const [isLoading, setLoading] = useState(false)
   const [isError, setError] = useState(false)
 
   const fetchData = () => {
     fetch('https://api.punkapi.com/v2/beers?per_page=80')
-    //https://zoo-animal-api.herokuapp.com/animals/rand/3 this works!
       .then(response => {
         if (response.status >= 400) {
           setError(true)
@@ -28,7 +26,7 @@ function App() {
         return response.json()
       })
       .then(data => {
-        console.log(data)
+        //console.log(data)
         setLoading(false)
         updateBeers(data)
       })
@@ -40,14 +38,16 @@ function App() {
   }, [])
 
   const searchItems = () => {
-    setSearchInput(textInput.current.value)
-    if (textInput.current.value !== '') {
+    if (searchInput !== '') {
       const filteredData = beers.filter((item) => {
-        return Object.values(item.name).join('').toLowerCase().includes(textInput.current.value.toLowerCase())
+        return Object.values(item.name).join('').toLowerCase().includes(searchInput.toLowerCase())
       })
+      //console.log(filteredData)
+      setIsDoneFiltering(true)
       setFilteredResults(filteredData)
     }
     else {
+      setIsDoneFiltering(false)
       setFilteredResults(beers)
     }
   }
@@ -57,7 +57,7 @@ function App() {
       const filteredData = [...filteredResults].sort((a,b) => {
         return a.first_brewed.localeCompare(b.first_brewed)
       })
-      console.log(filteredData)
+      //console.log(filteredData)
       setFilteredResults(filteredData)
     }
     else {
@@ -65,7 +65,7 @@ function App() {
         const filteredData = [...filteredResults].sort((a,b) => {
           return a.ph > b.ph ? 1 : -1
         })
-        console.log(filteredData)
+        //console.log(filteredData)
         setFilteredResults(filteredData)
       }
     }
@@ -79,12 +79,13 @@ function App() {
 
           <div className="searchArea">
                 <div class="d-none d-lg-block">
-                  <FormLabel htmlFor="beerSearch">Search API for Beers</FormLabel>
+                  <FormLabel>Search API for Beers</FormLabel>
 
 
                 <div class="input-group mb-3">
-                  <input ref={textInput} type="text" class="form-control" id="search" placeholder="Search for beer..." name="search"></input>
-                  <button type="submit" class="btn btn-primary" onClick={searchItems}><FontAwesomeIcon icon={faMagnifyingGlass}></FontAwesomeIcon></button>
+                  <input type="text" class="form-control" id="search" value={searchInput} onChange={event => setSearchInput(event.target.value)} placeholder="Search for beer..." name="search"></input>
+
+                  <button type="submit" class="btn btn-primary" id="button1" onClick={searchItems}><FontAwesomeIcon icon={faMagnifyingGlass}></FontAwesomeIcon></button>
                 </div>
 
 
@@ -97,15 +98,16 @@ function App() {
               </div>
 
               <div class=".d-none d-md-block d-lg-none">
-                <form>
+                <div>
                   <div class="row">
                     <div class="col">
-                <FormLabel htmlFor="beerSearch">Search API for Beers</FormLabel>
+                <FormLabel>Search API for Beers</FormLabel>
 
-
+                  
                 <div class="input-group mb-3">
-                  <input ref={textInput} type="text" class="form-control" id="search" placeholder="Search for beer..." name="search"></input>
-                  <button type="submit" class="btn btn-primary" onClick={searchItems}><FontAwesomeIcon icon={faMagnifyingGlass}></FontAwesomeIcon></button>
+                 <input type="text" class="form-control" id="search2" value={searchInput} onChange={event => setSearchInput(event.target.value)} placeholder="Search for beer..." name="search2"></input>
+
+                  <button type="submit" class="btn btn-primary" id="button2" onClick={searchItems}><FontAwesomeIcon icon={faMagnifyingGlass}></FontAwesomeIcon></button>
                 </div>
                     </div>
                     <div class="col">
@@ -117,12 +119,9 @@ function App() {
                   </Form.Select>
                     </div>
                   </div>
-                </form>
+                </div>
               </div>
-
-
           </div>
-
       </div>
 
       <div className="App-body">
@@ -134,7 +133,7 @@ function App() {
           )}
 
 
-          {searchInput.length > 0 ? (
+          {isDoneFiltering ? (
             <h5>{filteredResults.length > 0 ? <h5>Number of results from search: {filteredResults.length}</h5> : 'No results found!'}</h5>
           ) : (
             <h5>Number of results: {beers.length}</h5>
@@ -145,25 +144,25 @@ function App() {
           <p>Loading...</p>
         ) : (
           <ul class="no-bullets">
-          {searchInput.length > 0 ? (
+          {isDoneFiltering ? (
             filteredResults.map((item) => {
               return (
               <li key={item.id}> 
               <h5>Name: {item.name}</h5>
-              Description: {item.description} <br />
-              Tagline: {item.tagline} <br />
-              First brewed: {item.first_brewed} <br />
-              ph level: {item.ph}</li>
+              <b>Description: </b>{item.description} <br />
+              <b>Tagline:</b> {item.tagline} <br />
+              <b>First brewed:</b> {item.first_brewed} <br />
+              <b>ph level:</b> {item.ph}</li>
             )})
           ) : (
             beers.map((item) => {
               return (
               <li key={item.id}>
               <h5>Name: {item.name}</h5>
-              Description: {item.description} <br />
-              Tagline: {item.tagline} <br />
-              First brewed: {item.first_brewed} <br />
-              ph level: {item.ph}</li>
+              <b>Description: </b>{item.description} <br />
+              <b>Tagline:</b> {item.tagline} <br />
+              <b>First brewed:</b> {item.first_brewed} <br />
+              <b>ph level:</b> {item.ph}</li>
             )})
           )}
           </ul>
@@ -174,5 +173,3 @@ function App() {
 }
 
 export default App;
-
-{/* <p>Number of results from search: {filteredResults.length}</p> */}
